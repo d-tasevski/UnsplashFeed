@@ -16,6 +16,17 @@ export default class App extends React.Component {
 		selectedItemId: null,
 	};
 
+	async componentDidMount() {
+		try {
+			const commentsForItem = await AsyncStorage.getItem(ASYNC_STORAGE_COMMENTS_KEY);
+			this.setState({
+				commentsForItem: commentsForItem ? JSON.parse(commentsForItem) : {},
+			});
+		} catch (e) {
+			console.log('Failed to load comments');
+		}
+	}
+
 	openCommentScreen = id =>
 		this.setState({
 			showModal: true,
@@ -36,7 +47,13 @@ export default class App extends React.Component {
 			[selectedItemId]: [...comments, text],
 		};
 
-		return this.setState({ commentsForItem: updated });
+		this.setState({ commentsForItem: updated });
+
+		try {
+			AsyncStorage.setItem(ASYNC_STORAGE_COMMENTS_KEY, JSON.stringify(updated));
+		} catch (e) {
+			console.log('Failed to save comment', text, 'for', selectedItemId);
+		}
 	};
 
 	render() {
